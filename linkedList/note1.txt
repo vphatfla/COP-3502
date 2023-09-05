@@ -1,0 +1,20 @@
+struct node {
+    int data;
+    struct node* next;
+}
+
+// make node function
+
+node* makeNode(int value) {
+    node* newNode = malloc(sizeof(node));
+    newNode->data =value;
+    newNode->next = null;
+    return newNode;
+}
+
+node* insertFront(node* list, int value) {
+    node* newFront = makeNode(value);
+    newFront->next = list;
+    return newFront;
+}
+
