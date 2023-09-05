@@ -1,4 +1,0 @@
-
-// use 3d array, not quite 3d, but 2d, and inside each 2d cell there will be another array
-
-claimList*** 
