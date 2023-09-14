@@ -1,0 +1,6 @@
+queue - First in First out
+
+enqueue - add to the back of the line
+front - return number front item
+empty -- return true if queue is empty
+size -- current size
