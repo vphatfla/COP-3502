@@ -1,3 +1,8 @@
+/*
+Van Phat Phan
+COP 3502
+09/19/23*/
+
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -256,7 +261,7 @@ void processBooth(Queue **listQueue, int queueAr[], int arSize)
         currentTime = (startTime + DEFAULTPROCESSTIME + processingNode->customer->numberOfTickets * PROCESSTIMEPERTICKET);
 
         // print the information of the customer
-        printf("%s from line %i check out at time %i.\n", processingNode->customer->name, indexOfQueueWithMinArrivalTime + 1, currentTime);
+        printf("%s from line %i checks out at time %i.\n", processingNode->customer->name, indexOfQueueWithMinArrivalTime + 1, currentTime);
         // decrease number of nonEmtpy queue
         if (empty(queueWithMinArrivalTime))
             numberOfNoneEmptyQueue -= 1;
