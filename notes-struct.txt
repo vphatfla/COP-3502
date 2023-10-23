@@ -1,8 +1,0 @@
-typedef struct <name> {
-    ...
-} name;
-
-dynamic list structure
-
-
-typedef struct claiml
