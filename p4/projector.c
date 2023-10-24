@@ -12,8 +12,8 @@ COP-3502 Section 4
     #define M_PI 3.14159265358979323846
 #endif
 // global variables
-int N, A, rA;   // N: number of people, A: initial angle dree, rA: angle in radian unit
-
+int N, A;   // N: number of people, A: initial angle dree, rA: angle in radian unit
+double rA;
 // struct for the group of people coordinate
 typedef struct group
 {
@@ -33,12 +33,14 @@ double degreesToRadians(double degrees);
 void Merge(group** list_group, int start, int mid, int end);
 void MergeSort(group** lsit_group, int start, int end);
 // calculate minimum number of peoplein rA
-void minimumPeopleInRange(group** list_group);
+int minimumPeopleInRange(group** list_group);
+double maxAngleWithoutPerson(group** list_group);
+
+
 int main() {
     // take input
     scanf("%d %d", &N, &A);
     rA = degreesToRadians(A);
-
     // allocate memory for list of group
     group **list_group = malloc((N*2)* sizeof(group*));
     
@@ -68,7 +70,13 @@ int main() {
         printf("Angle = %f\n", list_group[i]->angle);
     }
 
+    int minInDefaultRange  = minimumPeopleInRange(list_group);
 
+    printf("Minimum people in range = %d \n", minInDefaultRange);
+
+    double max = maxAngleWithoutPerson(list_group);
+
+    printf("Max without person = %.4f\n", radiansToDegrees(max));
     freeMemory(list_group);
     return 0;
 }
@@ -81,8 +89,41 @@ group* createNewGroup(int x, int y, int s) {
     newGroup->angle = calculateAngle(x,y);
     return newGroup;
 }
-void minimumPeopleInRange(group** list_group) {
-    int count =0;
+int minimumPeopleInRange(group** list_group) {
+    int minCount = -1;
+
+    for (int left =0; left<N; left +=1) {
+        int currCount = 0;
+        double currAngle = list_group[left]->angle;
+        double rangeAngle = currAngle + rA;
+        int right = left +1;
+        while (right < (left+N) && list_group[right]->angle<rangeAngle) {
+            if (list_group[right]->angle != currAngle) currCount+= list_group[right]->s; // if the next point is align with the left point, DO NOT ADD INTO COUNT
+            right +=1;
+        } 
+        if (minCount == -1 || currCount<minCount) 
+            minCount = currCount;
+    }
+
+    return minCount;
+
+
+}
+
+double maxAngleWithoutPerson(group** list_group) {
+    double max = 0;
+    
+    for (int left = 0; left<N; left +=1) {
+        int right  = left +1;
+        double currAngle = list_group[left]->angle;
+        while (right <(left+N) && list_group[right]->angle == currAngle) {
+            right +=1;
+        }
+        if (list_group[right]->angle - currAngle > max)
+            max = list_group[right]->angle - currAngle;
+    }
+
+    return max;
 }
 double calculateAngle(int x, int y) {
     return atan2(y,x);
