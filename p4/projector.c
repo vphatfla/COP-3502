@@ -53,30 +53,17 @@ int main() {
         list_group[N+i]->angle = (list_group[N+i]->angle + (2*M_PI));  
     }
 
-    // print out group information
-    for (int i=0; i<N*2; i+=1) {
-        printf("Group %d\n", i);
-        printf("x = %d, y = %d, s = %d \n",list_group[i]->x, list_group[i]->y, list_group[i]->s);
-        printf("Angle = %f\n", list_group[i]->angle);
-    }
 
     // sort the list_group based on the angle
     MergeSort(list_group, 0, N*2-1);
-    printf("AFTER SORT -----------------------------\n\n\n");
-    // reprint
-    for (int i=0; i<N*2; i+=1) {
-        printf("Group %d\n", i);
-        printf("x = %d, y = %d, s = %d \n",list_group[i]->x, list_group[i]->y, list_group[i]->s);
-        printf("Angle = %f\n", list_group[i]->angle);
-    }
 
     int minInDefaultRange  = minimumPeopleInRange(list_group);
 
-    printf("Minimum people in range = %d \n", minInDefaultRange);
+    printf("%d\n", minInDefaultRange);
 
     double max = maxAngleWithoutPerson(list_group);
 
-    printf("Max without person = %.4f\n", radiansToDegrees(max));
+    printf("%.4f\n", radiansToDegrees(max));
     freeMemory(list_group);
     return 0;
 }
