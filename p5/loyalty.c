@@ -104,13 +104,18 @@ struct treenode* insert(treenode* root,
 
     // Inserting into an empty tree.
     if (root == NULL)
-        return element;
+        {
+            element->size = 1;
+            return element; 
+        }
+
 
     // Regular case.
     else {
         int compare_result = compare_string(element->cPtr->name, root->cPtr->name);
         
         // customer existed, update the points
+        // no size update
         if (compare_result == 0) {
             root->cPtr->points += element->cPtr->points;
             free_memory_node(element);
@@ -118,7 +123,8 @@ struct treenode* insert(treenode* root,
         // element name is greater than root
         // element should be inserted to the right.
         else if (compare_result > 0) {
-
+            // increase the size of root first
+            root->size += 1;
             // There is a right subtree to insert the node.
             if (root->right != NULL)
                 root->right = insert(root->right, element);
@@ -130,7 +136,8 @@ struct treenode* insert(treenode* root,
 
         // element should be inserted to the left.
         else {
-
+            // increase the size of root first
+            root->size +=1;
             // There is a left subtree to insert the node.
             if (root->left != NULL)
                 root->left = insert(root->left, element);
