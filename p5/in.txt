@@ -15,5 +15,5 @@ search bret
 search daniel
 search christian
 sub christian 20
-search sami
+count_smaller sami 
 del sami

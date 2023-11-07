@@ -55,7 +55,7 @@ struct treenode* delete(struct treenode* root, treenode* delNode);
 int compare_string(char name1[], char name2[]);
 void free_memory_node(treenode *node);
 void free_memory_BST(treenode* root);
-
+void count_recursive(treenode* root, treenode* thisNode, int currSum);
 // command functions 
 treenode* add_command(treenode* root);
 treenode* sub_command(treenode* root);
@@ -91,6 +91,7 @@ int main() {
         }
         else if (strcmp(command, "count_smaller") == 0) {
             //printf("count_smaller command \n");
+            count_smaller_command(root);
         }
     }
 
@@ -438,6 +439,26 @@ treenode* del_command(treenode* root) {
     return delete(root, existed_node);
 
 }
+void count_recursive(treenode* root, treenode* thisNode, int currSum) {
+    if (root == thisNode) {
+        if (thisNode->left != NULL)
+            printf("%d\n", (currSum + thisNode->left->size));
+        else 
+            printf("%d\n", (currSum));
+        return;
+    }
+
+    // else do comparision
+    int compare_result = compare_string(thisNode->cPtr->name, root->cPtr->name);
+    
+    // Search to the left.
+    if (compare_result < 0)
+        count_recursive(root->left, thisNode, currSum);
+
+    // Or...search to the right.
+    else
+        count_recursive(root->right, thisNode, (currSum + (root->size-root->right->size)));
+}
 void count_smaller_command(treenode* root) {
     char name[MAXLEN];
     scanf("%s", name);
@@ -447,7 +468,7 @@ void count_smaller_command(treenode* root) {
     if (existed_node == NULL) 
         printf("%s not found\n", name);
     else {
-
+        count_recursive(root, existed_node, 0);
     }
 }
 
