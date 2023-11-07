@@ -54,22 +54,53 @@ struct treenode* delete(struct treenode* root, char name[]);
 // ultilities functions
 int compare_string(char name1[], char name2[]);
 void free_memory_node(treenode *node);
+void free_memory_BST(treenode* root);
 
 // command functions 
-void add_command();
-void sub_command();
-void del_command();
-void count_smaller_command();
+treenode* add_command(treenode* root);
+treenode* sub_command(treenode* root);
+void search_command(treenode* root);
+void del_command(treenode* root);
+void count_smaller_command(treenode* root);
 
 int main() {
+    treenode* root = NULL;
+    
     // init num_customer
     num_customer = 0;
-    scanf("%d", N);
+    scanf("%d", &N);
     for (int i = 0; i< N; i+=1) {
         char command[15]; // command max length is 15, count_smaller isn't even 15, safety upper bound
         scanf("%s", command);
-
+        
+        if (strcmp(command, "add") == 0) {
+            printf("Add command \n");
+            root = add_command(root);
+        }
+        else if (strcmp(command, "sub") == 0) {
+            printf("Sub command \n");
+            root = sub_command(root);
+        }
+        else if (strcmp(command, "del")) {
+            printf("del command \n");
+        }
+        else if (strcmp(command, "search") == 0) {
+            printf("search command \n");
+        }
+        else if (strcmp(command, "count_smaller") == 0) {
+            printf("count_smaller command \n");
+        }
     }
+
+
+    preorder(root);
+
+
+    // memory free
+    free_memory_BST(root);
+    root = NULL;
+    if (root == NULL) 
+        printf("Free memory successfully\n");
     return 0;
 }
 
@@ -97,6 +128,21 @@ void free_memory_node(treenode *node) {
     free(node->cPtr);
     free(node);
 }
+
+void free_memory_BST(treenode* root) {
+    if (root == NULL) 
+        return;
+    
+    if (root->left != NULL)
+        free_memory_BST(root->left);
+    if (root->right != NULL)
+        free_memory_BST(root->right);
+    
+    root->left = NULL;
+    root->right = NULL;
+    free_memory_node(root);
+    root = NULL;
+}
 // Inserts a the node pointed to by element in the tree rooted by
 // root and returns a pointer to the resulting tree.
 struct treenode* insert(treenode* root,
@@ -105,7 +151,6 @@ struct treenode* insert(treenode* root,
     // Inserting into an empty tree.
     if (root == NULL)
         {
-            element->size = 1;
             return element; 
         }
 
@@ -137,7 +182,7 @@ struct treenode* insert(treenode* root,
         // element should be inserted to the left.
         else {
             // increase the size of root first
-            root->size +=1;
+            root->size += 1;
             // There is a left subtree to insert the node.
             if (root->left != NULL)
                 root->left = insert(root->left, element);
@@ -155,12 +200,12 @@ struct treenode* insert(treenode* root,
 // Returns a pointer to a node that stores value in it in the subtree
 // pointed to by current_ptr. NULL is returned if no such node is found.
 struct treenode* findNode(struct treenode *current_ptr, char name[]) {
-    int compare_result = compare_string(name, current_ptr->cPtr->name);
+
     // Check if there are nodes in the tree.
     if (current_ptr != NULL) {
-
+        int compare_result = compare_string(name, current_ptr->cPtr->name);
         // Found the value at the root.
-        if (compare_result)
+        if (compare_result == 0)
             return current_ptr;
 
         // Search to the left.
@@ -310,3 +355,86 @@ struct treenode* delete(struct treenode* root, char name[]) {
 
     return root;
 }
+
+
+// command functions 
+treenode* add_command(treenode* root) {
+    char name[MAXLEN];
+    int points;
+    scanf("%s", name);
+    scanf("%d",  &points);
+    // check if existed
+    treenode* existed_node = findNode(root, name);
+    
+    if (existed_node != NULL) {
+        existed_node->cPtr->points +=points;
+        printf("%s %d\n", existed_node->cPtr->name, existed_node->cPtr->points);
+        return root;
+    }
+    customer* new_customer = create_new_customer(name, points);
+    treenode* new_treenode = create_new_node(new_customer);
+
+    new_treenode->size = 1;
+
+    printf("%s %d\n", new_treenode->cPtr->name, new_treenode->cPtr->points);
+    return insert(root, new_treenode);
+}
+treenode* sub_command(treenode* root) {
+    char name[MAXLEN];
+    int points;
+    scanf("%s", name);
+    scanf("%d", &points);
+
+    treenode* existed_node = findNode(root, name);
+
+    if (existed_node != NULL) {
+        existed_node->cPtr->points -= points;
+        if (existed_node->cPtr->points <0)
+            existed_node->cPtr->points = 0;
+        printf("%s %d\n", existed_node->cPtr->name, existed_node->cPtr->points);
+    }
+    
+    printf("%s not found\n", existed_node->cPtr->name);
+    return root;
+}
+
+void search_command(treenode* root) {
+    char name[MAXLEN];
+    scanf("%s", name);
+
+    treenode* existed_node = findNode(root, name);
+
+    if (existed_node != NULL) {
+        printf("%s %d %d\n", existed_node->cPtr->name, existed_node->cPtr->points, existed_node->size);
+    }
+}
+void del_command(treenode* root) {
+
+}
+void count_smaller_command(treenode* root) {
+
+}
+
+
+// Traversals.
+void preorder(struct treenode *current_ptr) {
+    if (current_ptr != NULL)
+    {
+        printf("%s %d w = %d -- \n", current_ptr->cPtr->name, current_ptr->cPtr->points, current_ptr->size);
+        preorder(current_ptr->left);
+        preorder(current_ptr->right);
+    }
+    else {
+        printf("NULL --\n");
+    }
+
+}
+void inorder(struct treenode *current_ptr) {
+    if (current_ptr != NULL) {
+        inorder(current_ptr->left);
+        printf("%s %d --", current_ptr->cPtr->name, current_ptr->cPtr->points);
+        inorder(current_ptr->right);
+    }
+    else 
+        printf("NULL -- \n");
+}   

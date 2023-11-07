@@ -1,0 +1,5 @@
+4
+add christian 30
+add allan 40
+add aisha 45
+sub christian 50
