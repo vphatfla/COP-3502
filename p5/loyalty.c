@@ -49,7 +49,7 @@ struct treenode* minVal(struct treenode *root);
 struct treenode* maxVal(struct treenode *root);
 
 // Delete functions.
-struct treenode* delete(struct treenode* root, char name[]);
+struct treenode* delete(struct treenode* root, treenode* delNode);
 
 // ultilities functions
 int compare_string(char name1[], char name2[]);
@@ -60,7 +60,7 @@ void free_memory_BST(treenode* root);
 treenode* add_command(treenode* root);
 treenode* sub_command(treenode* root);
 void search_command(treenode* root);
-void del_command(treenode* root);
+treenode* del_command(treenode* root);
 void count_smaller_command(treenode* root);
 
 int main() {
@@ -74,25 +74,27 @@ int main() {
         scanf("%s", command);
         
         if (strcmp(command, "add") == 0) {
-            printf("Add command \n");
+           // printf("Add command \n");
             root = add_command(root);
         }
         else if (strcmp(command, "sub") == 0) {
-            printf("Sub command \n");
+            //printf("Sub command \n");
             root = sub_command(root);
         }
-        else if (strcmp(command, "del")) {
-            printf("del command \n");
+        else if (strcmp(command, "del") == 0) {
+            //printf("del command \n");
+            root = del_command(root);
         }
         else if (strcmp(command, "search") == 0) {
-            printf("search command \n");
+            //printf("search command \n");
+            search_command(root);
         }
         else if (strcmp(command, "count_smaller") == 0) {
-            printf("count_smaller command \n");
+            //printf("count_smaller command \n");
         }
     }
 
-
+    printf("________________\n\n");
     preorder(root);
 
 
@@ -241,6 +243,9 @@ struct treenode* parent(struct treenode *root, struct treenode *node) {
     if (root ==NULL || root == node) 
         return NULL;
     
+    // decrease the size from root to parent of the node we finding, inclusively 
+    root->size -= 1;
+
     // the root is the direct parent of node
     if (root->left == node || root->right == node)
         return root;
@@ -272,12 +277,16 @@ struct treenode* maxVal(struct treenode *root)
 }
 
 // Delete functions.
-struct treenode* delete(struct treenode* root, char name[]) {
+struct treenode* delete(struct treenode* root, treenode* delNode) {
 
-    treenode *delNode, *new_del_node, *save_node;
+    treenode *save_node;
     treenode *parentNode;
     
-    delNode = findNode(root, name);
+    // we are sure that delnode is not null
+    // when finding the parent, decrease each node above the node we finding by 1
+
+    // if delNode is leaf, when we don't have to do anything else because the parent function took care of it
+
     parentNode = parent(root, delNode);
 
     if (isLeaf(delNode)) {
@@ -317,7 +326,7 @@ struct treenode* delete(struct treenode* root, char name[]) {
         }
         else { // delete node if it's a right child
             save_node = parentNode->right;
-            parentNode->right = parentNode->right->right; // remove the right from the BST
+            parentNode->right = parentNode->right->left; // remove the right from the BST
             free_memory_node(delNode);
         }
         return root;    
@@ -345,13 +354,16 @@ struct treenode* delete(struct treenode* root, char name[]) {
 
     // if none of these aboves are the case, then "switch the place of delnode customer with the maxVal"
     // find the greatest on the left
-    new_del_node = maxVal(delNode->left);
-    customer* new_customer_pointer = new_del_node->cPtr;
-    
-    delete(root, new_del_node->cPtr->name); // recursively delete the node with the given name, kinda sketchy at this point
+    treenode* new_del_node = maxVal(delNode->left);
+    char saved_name[MAXLEN];
+    strcpy(saved_name, new_del_node->cPtr->name);
+    int saved_points = new_del_node->cPtr->points;
+
+    delete(delNode, new_del_node); // recursively delete the node with the given name, kinda sketchy at this point
 
     // restore the save data
-    delNode->cPtr = new_customer_pointer;
+    strcpy(delNode->cPtr->name, saved_name);
+    delNode->cPtr->points = saved_points;
 
     return root;
 }
@@ -394,7 +406,7 @@ treenode* sub_command(treenode* root) {
         printf("%s %d\n", existed_node->cPtr->name, existed_node->cPtr->points);
     }
     
-    printf("%s not found\n", existed_node->cPtr->name);
+    printf("%s not found\n", name);
     return root;
 }
 
@@ -407,12 +419,36 @@ void search_command(treenode* root) {
     if (existed_node != NULL) {
         printf("%s %d %d\n", existed_node->cPtr->name, existed_node->cPtr->points, existed_node->size);
     }
+    else printf("%s not found\n", name);
 }
-void del_command(treenode* root) {
+treenode* del_command(treenode* root) {
+    char name[MAXLEN];
+    scanf("%s", name);
+
+    treenode* existed_node = findNode(root, name);
+
+    if (existed_node == NULL) 
+    {
+        printf("%s not found\n", name);
+        return root;
+    }
+
+
+    printf("%s deleted\n", name);
+    return delete(root, existed_node);
 
 }
 void count_smaller_command(treenode* root) {
+    char name[MAXLEN];
+    scanf("%s", name);
+    
+    treenode* existed_node = findNode(root, name);
 
+    if (existed_node == NULL) 
+        printf("%s not found\n", name);
+    else {
+
+    }
 }
 
 
