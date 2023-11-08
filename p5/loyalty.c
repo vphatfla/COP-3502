@@ -56,6 +56,9 @@ int compare_string(char name1[], char name2[]);
 void free_memory_node(treenode *node);
 void free_memory_BST(treenode* root);
 void count_recursive(treenode* root, treenode* thisNode, int currSum);
+int find_node_with_depth(treenode* root, char name[], int currDepth);
+int put_tree_into_arr(treenode* root, treenode** arr, int curr_index);
+
 // command functions 
 treenode* add_command(treenode* root);
 treenode* sub_command(treenode* root);
@@ -98,7 +101,14 @@ int main() {
     printf("________________\n\n");
     preorder(root);
 
+    // put into 2D arrays
+    int ar_size = root->size;
+    treenode** arr = malloc(ar_size*sizeof(treenode*));
+    int index = put_tree_into_arr(root, arr, 0);
 
+    for (int i=0; i<ar_size; i+=1) {
+        printf("i = %d  name = %s\n",i, arr[i]->cPtr->name);
+    }
     // memory free
     free_memory_BST(root);
     root = NULL;
@@ -406,8 +416,8 @@ treenode* sub_command(treenode* root) {
             existed_node->cPtr->points = 0;
         printf("%s %d\n", existed_node->cPtr->name, existed_node->cPtr->points);
     }
-    
-    printf("%s not found\n", name);
+    else 
+        printf("%s not found\n", name);
     return root;
 }
 
@@ -415,12 +425,10 @@ void search_command(treenode* root) {
     char name[MAXLEN];
     scanf("%s", name);
 
-    treenode* existed_node = findNode(root, name);
+    int depth = find_node_with_depth(root, name, 0);
 
-    if (existed_node != NULL) {
-        printf("%s %d %d\n", existed_node->cPtr->name, existed_node->cPtr->points, existed_node->size);
-    }
-    else printf("%s not found\n", name);
+    if (depth == -1)
+        printf("%s not found\n", name);
 }
 treenode* del_command(treenode* root) {
     char name[MAXLEN];
@@ -472,7 +480,32 @@ void count_smaller_command(treenode* root) {
     }
 }
 
+int find_node_with_depth(treenode* root, char name[], int currDepth) {
+    if (root == NULL)
+        return -1;
+    int compare_result = compare_string(name, root->cPtr->name);
+    
+    if (compare_result == 0) {
+        printf("%s %d %d\n", root->cPtr->name, root->cPtr->points, currDepth);
+        return currDepth; }
+    else if (compare_result < 0)
+        return find_node_with_depth(root->left, name, currDepth + 1);
+    else 
+        return find_node_with_depth(root->right, name, currDepth + 1);
+    
+}
 
+int put_tree_into_arr(treenode* root, treenode** arr, int curr_index) {
+    if (root == NULL)
+        return curr_index;
+    arr[curr_index] = root;
+    if (root->left != NULL)
+        curr_index = put_tree_into_arr(root->left, arr, curr_index + 1);
+    if (root->right != NULL)
+        curr_index = put_tree_into_arr(root->right, arr, curr_index + 1);
+    
+    return curr_index;
+}
 // Traversals.
 void preorder(struct treenode *current_ptr) {
     if (current_ptr != NULL)
