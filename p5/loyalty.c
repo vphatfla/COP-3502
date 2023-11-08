@@ -57,7 +57,7 @@ void free_memory_node(treenode *node);
 void free_memory_BST(treenode* root);
 void count_recursive(treenode* root, treenode* thisNode, int currSum);
 int find_node_with_depth(treenode* root, char name[], int currDepth);
-int put_tree_into_arr(treenode* root, treenode** arr, int curr_index);
+int put_tree_into_arr(treenode* root, customer** arr, int curr_index);
 
 // command functions 
 treenode* add_command(treenode* root);
@@ -65,6 +65,12 @@ treenode* sub_command(treenode* root);
 void search_command(treenode* root);
 treenode* del_command(treenode* root);
 void count_smaller_command(treenode* root);
+
+// function for sorting
+void quicksort(customer** arr, int low, int high);
+int partition(customer** arr, int low, int high);
+void swap(customer** arr, int i1, int i2);
+
 
 int main() {
     treenode* root = NULL;
@@ -98,22 +104,26 @@ int main() {
         }
     }
 
-    printf("________________\n\n");
-    preorder(root);
+    // printf("________________\n\n");
+    // preorder(root);
 
     // put into 2D arrays
     int ar_size = root->size;
-    treenode** arr = malloc(ar_size*sizeof(treenode*));
+    customer** arr = malloc(ar_size*sizeof(customer*));
     int index = put_tree_into_arr(root, arr, 0);
 
+    // for (int i=0; i<ar_size; i+=1) {
+    //     printf("i = %d  name = %s point = %d\n",i, arr[i]->name, arr[i]->points);
+    // }
+
+    // printf("\n");
+    quicksort(arr, 0, ar_size-1);
+
     for (int i=0; i<ar_size; i+=1) {
-        printf("i = %d  name = %s\n",i, arr[i]->cPtr->name);
+        printf("%s %d\n", arr[i]->name, arr[i]->points);
     }
     // memory free
     free_memory_BST(root);
-    root = NULL;
-    if (root == NULL) 
-        printf("Free memory successfully\n");
     return 0;
 }
 
@@ -166,7 +176,6 @@ struct treenode* insert(treenode* root,
         {
             return element; 
         }
-
 
     // Regular case.
     else {
@@ -495,10 +504,11 @@ int find_node_with_depth(treenode* root, char name[], int currDepth) {
     
 }
 
-int put_tree_into_arr(treenode* root, treenode** arr, int curr_index) {
+int put_tree_into_arr(treenode* root, customer** arr, int curr_index) {
+
     if (root == NULL)
         return curr_index;
-    arr[curr_index] = root;
+    arr[curr_index] = root->cPtr;
     if (root->left != NULL)
         curr_index = put_tree_into_arr(root->left, arr, curr_index + 1);
     if (root->right != NULL)
@@ -528,3 +538,36 @@ void inorder(struct treenode *current_ptr) {
     else 
         printf("NULL -- \n");
 }   
+
+
+// function for sorting
+void quicksort(customer** arr, int low, int high) {
+    if (low >= high)
+        return;
+    
+    int pivot_index = partition(arr, low, high);
+    
+    quicksort(arr, low, pivot_index-1);
+    quicksort(arr, pivot_index +1, high);
+}
+int partition(customer** arr, int low, int high) {
+    customer* pivot = arr[high];
+
+    int new_low = low;
+
+    for (int i = low; i<high; i+=1) {
+        if (arr[i]->points > pivot->points) {
+            swap(arr, new_low, i);
+            new_low +=1;
+        }
+    }
+
+    swap(arr, new_low, high);
+
+    return new_low;
+}
+void swap(customer** arr, int i1, int i2) {
+    customer* temp = arr[i1];
+    arr[i1] = arr[i2];
+    arr[i2] = temp;
+}
