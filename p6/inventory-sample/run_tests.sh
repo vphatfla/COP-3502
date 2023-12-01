@@ -33,6 +33,3 @@ for ((i=1; i<=$num_tests; i++)); do
     echo "Test case $i: Failed"
   fi
 done
-
-# Cleanup
-rm -f inventory

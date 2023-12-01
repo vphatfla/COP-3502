@@ -51,8 +51,9 @@ item *create_new_item(char name[], int quantity, int buy_price);
 node *create_new_node(item *item_ptr);
 void display_hashmap();
 void print_item(node *crr_node);
-void sell_item(char name[], int quantity);
-void update_item_price(char name[], int new_price);
+void sell_item(node *node, int quantity);
+void update_item_price(node *node, int new_price);
+node *search_node(node *front, char name[]);
 
 int main()
 {
@@ -99,20 +100,22 @@ int hashfunc(char *word, int size)
 
 void buy_comand()
 {
-    char item_str[MAXLEN];
+    char name[MAXLEN];
     int quantity;
     int totalPrice;
-    scanf("%s %d %d", item_str, &quantity, &totalPrice);
+    scanf("%s %d %d", name, &quantity, &totalPrice);
 
-    insert_new_item(item_str, quantity, totalPrice);
+    insert_new_item(name, quantity, totalPrice);
 }
 void change_price_command()
 {
     char name[MAXLEN];
     int new_price = 0;
     scanf("%s %d", name, &new_price);
-
-    update_item_price(name, new_price);
+    int hash_index = hashfunc(name, TABLESIZE);
+    node *front = hashmap->lists[hash_index];
+    node *node = search_node(front, name);
+    update_item_price(node, new_price);
     return;
 }
 void sell_command()
@@ -120,7 +123,10 @@ void sell_command()
     char name[19];
     int quantity = 0;
     scanf("%s %d", name, &quantity);
-    sell_item(name, quantity);
+    int hash_index = hashfunc(name, TABLESIZE);
+    node *front = hashmap->lists[hash_index];
+    node *node = search_node(front, name);
+    sell_item(front, quantity);
     return;
 }
 item *create_new_item(char name[], int quantity, int buy_price)
@@ -139,63 +145,46 @@ node *create_new_node(item *item_ptr)
     return new_node;
 }
 
+node *search_node(node *front, char name[])
+{
+    performance_count += 1;
+    if (front == NULL || strcmp(name, front->iPtr->name) == 0)
+        return front;
+    return search_node(front->next, name);
+}
 void insert_new_item(char name[], int quantity, int buy_price)
 {
     int hash_index = hashfunc(name, TABLESIZE);
-    node *front = hashmap->lists[hash_index];
-    node *prev = front;
-    int k = 0;
-    while (front != NULL)
+
+    node *prev = NULL;
+    node *node = hashmap->lists[hash_index];
+    while (node != NULL && strcmp(node->iPtr->name, name) != 0)
     {
-        k += 1;
-        if (strcmp(front->iPtr->name, name) == 0)
-        {
-            // node exisited
-            front->iPtr->quantity += quantity;
-            budget -= buy_price;
-            performance_count += k;
-            print_item(front);
-            return;
-        }
-        prev = front;
-        front = front->next;
+        performance_count += 1;
+        prev = node;
+        node = node->next;
     }
-    // at this point, we need to create new node,
-    item *new_item = create_new_item(name, quantity, buy_price);
-    front = create_new_node(new_item);
-    front->next = NULL;
-    if (prev == NULL)
-        hashmap->lists[hash_index] = front;
-    else
-        prev->next = front;
-    // update the budget
-    budget -= buy_price;
-    // update the performance
-    performance_count += (k + 1);
-    print_item(front);
+    // if (node == NULL)
+    // {
+    //     item *new_item = create_new_item(name, quantity, buy_price);
+    //     node = create_new_node(new_item);
+    //     performance_count += 1;
+    //     budget -= buy_price;
+    //     hashmap->lists[hash_index] = node;
+    //     return;
+    // }
 }
 
-void sell_item(char name[], int quantity)
+void sell_item(node *node, int quantity)
 {
-    int hash_index = hashfunc(name, TABLESIZE);
-    node *front = hashmap->lists[hash_index];
-
-    int k = 0;
-    while (front != NULL)
-    {
-        k += 1;
-        if (strcmp(front->iPtr->name, name) == 0)
-        {
-            if (front->iPtr->quantity < quantity)
-                quantity = front->iPtr->quantity;
-            budget += quantity * front->iPtr->saleprice;
-            front->iPtr->quantity -= quantity;
-            performance_count += k;
-            print_item(front);
-            return;
-        }
-        front = front->next;
-    }
+    if (node->iPtr->quantity < quantity)
+        quantity = node->iPtr->quantity;
+    budget += quantity * node->iPtr->saleprice;
+    node->iPtr->quantity -= quantity;
+    // performance_count += k;
+    print_item(node);
+    // printf("Performance %d \n", performance_count);
+    printf("\nPerformance %d \n", performance_count);
 }
 void free_memory()
 {
@@ -210,23 +199,9 @@ void free_memory()
     free(hashmap);
 }
 
-void update_item_price(char name[], int new_price)
+void update_item_price(node *node, int new_price)
 {
-    int hash_index = hashfunc(name, TABLESIZE);
-    node *front = hashmap->lists[hash_index];
-
-    int k = 0;
-    while (front != NULL)
-    {
-        k += 1;
-        if (strcmp(front->iPtr->name, name) == 0)
-        {
-            front->iPtr->saleprice = new_price;
-            performance_count += k;
-            return;
-        }
-        front = front->next;
-    }
+    node->iPtr->saleprice = new_price;
 }
 void free_memory_linkedList(node *front)
 {
