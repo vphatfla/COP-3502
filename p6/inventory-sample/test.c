@@ -34,7 +34,7 @@ typedef struct hashtable
 // testing functions
 int test(hashtable *h, char *name);
 void print(node *front);
-
+void display_hashmap(hashtable *hashmap);
 // given hash function
 int hashfunc(char *word, int size);
 
@@ -125,7 +125,7 @@ int main(void)
 
     // print total cash and time complexity
     printf("%d\n%d\n", totalCash, t);
-
+    display_hashmap(ht);
     // free memory
     delTable(ht);
     return 0;
@@ -214,6 +214,21 @@ node *search(char *name, node *front, hashtable *h, int hash)
     return search(name, front->next, h, hash);
 }
 
+void display_hashmap(hashtable *hashmap)
+{
+    for (int i = 0; i < hashmap->size; i += 1)
+    {
+        if (hashmap->lists[i] == NULL)
+            continue;
+        printf("at index %d\n", i);
+        node *front = hashmap->lists[i];
+        while (front != NULL)
+        {
+            printf("name = %s quantity = %d sale_price %d \n", front->iPtr->name, front->iPtr->quantity, front->iPtr->saleprice);
+            front = front->next;
+        }
+    }
+}
 // creates a new node
 node *insertNode(node *front, char *name)
 {
@@ -228,7 +243,7 @@ node *insertNode(node *front, char *name)
     // copies name
     strcpy(tmp->iPtr->name, name);
     // adds 1 to time complexity for making new node
-    t++;
+    // t++;
     printf("\nt = %d\n", t);
     //  returns new front/node
     return tmp;

@@ -126,7 +126,8 @@ void sell_command()
     int hash_index = hashfunc(name, TABLESIZE);
     node *front = hashmap->lists[hash_index];
     node *node = search_node(front, name);
-    sell_item(front, quantity);
+    // printf("name = %s vs %s \n", name, node->iPtr->name);
+    sell_item(node, quantity);
     return;
 }
 item *create_new_item(char name[], int quantity, int buy_price)
@@ -154,16 +155,36 @@ node *search_node(node *front, char name[])
 }
 void insert_new_item(char name[], int quantity, int buy_price)
 {
+    // printf("name in %s vs ", name);
     int hash_index = hashfunc(name, TABLESIZE);
 
-    node *prev = NULL;
     node *node = hashmap->lists[hash_index];
-    while (node != NULL && strcmp(node->iPtr->name, name) != 0)
+
+    performance_count += 1;
+    while ((node != NULL) && (strcmp(node->iPtr->name, name) != 0))
     {
         performance_count += 1;
-        prev = node;
         node = node->next;
     }
+
+    if (node == NULL)
+    {
+        item *new_item = create_new_item(name, quantity, buy_price);
+        node = create_new_node(new_item);
+        // print_item(node);
+        //  performance_count += 1;
+        node->next = hashmap->lists[hash_index];
+        hashmap->lists[hash_index] = node;
+    }
+    else
+    {
+        // printf("  %s \n", node->iPtr->name);
+        node->iPtr->quantity += quantity;
+        // print_item(node);
+    }
+
+    budget -= buy_price;
+    print_item(node);
     // if (node == NULL)
     // {
     //     item *new_item = create_new_item(name, quantity, buy_price);
@@ -177,6 +198,7 @@ void insert_new_item(char name[], int quantity, int buy_price)
 
 void sell_item(node *node, int quantity)
 {
+    // printf("IN SELL \n");
     if (node->iPtr->quantity < quantity)
         quantity = node->iPtr->quantity;
     budget += quantity * node->iPtr->saleprice;
@@ -184,7 +206,7 @@ void sell_item(node *node, int quantity)
     // performance_count += k;
     print_item(node);
     // printf("Performance %d \n", performance_count);
-    printf("\nPerformance %d \n", performance_count);
+    // printf("\nPerformance %d \n", performance_count);
 }
 void free_memory()
 {
